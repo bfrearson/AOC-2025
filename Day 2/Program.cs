@@ -2,7 +2,10 @@
 // Console.WriteLine(Part2("11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124"));
 // Console.WriteLine(Part2("1188511885-1188511885"));
 // Console.WriteLine(Part2("11-12"));
+
 // Console.WriteLine(Part2("4487-9581"));
+// Console.WriteLine(Part2("6256098346-6256303872"));
+// Console.WriteLine(Part2("6256262562-6256262562"));
 
 var input = File.ReadAllText("Input.txt");
 // Console.WriteLine(Part1(input));
@@ -54,42 +57,25 @@ long Part2(string inputString)
             {
                 var character = numberAsString[j];
                 buffer += character;
-                // Console.WriteLine($"Checking character {character} at position {j} with buffer {buffer} for pattern {pattern}");
 
                 if (buffer != pattern[..buffer.Length])
                 {
-                    // Console.WriteLine($"Pattern {pattern} did not partially match buffer {buffer}");
-                    pattern = numberAsString[..(j+1)];
+                    pattern = numberAsString[..(pattern.Length + 1)];
+                    j = pattern.Length - 1;
                     buffer = "";
                     continue;
                 }
                 
-                if (buffer.Length <  pattern.Length)
+                if (buffer.Length < pattern.Length)
                     continue;
 
                 if (buffer == pattern)
-                {
-                    // Console.WriteLine($"Matched pattern {pattern}");
                     buffer = "";
-                    // continue;
-                }
-                else
-                {
-                    pattern = numberAsString[..(j+1)];
-                    Console.WriteLine($"No match for string {numberAsString}, trying again with pattern {pattern}");
-                    buffer = "";
-                }
             }
 
-            if (pattern.Length <= numberAsString.Length / 2)
-            {
-                Console.WriteLine($"{numberAsString} in range {range} found smallest pattern: " + pattern);
+            if ((pattern.Length <= numberAsString.Length / 2) && buffer == "")
                 invalidIds.Add(i);
-            }
-            else
-            {
-                Console.WriteLine($"Didn't find match in {numberAsString}. Latest pattern: {pattern}");
-            }
+
         }
     }
 
