@@ -2,6 +2,10 @@
 
 // var input = File.ReadAllText("Input.txt");
 // Console.WriteLine(Part1(input.Split("\n")));
+
+var input = File.ReadAllText("Input.txt");
+Console.WriteLine(Part2(input.Split("\n")));
+
 // Isaac's Algorithm
 long Part1(string[] banks)
 {
@@ -38,4 +42,68 @@ long Part1(string[] banks)
         joltages.Add(long.Parse(maximumJoltage));
     }
     return joltages.Sum();
+}
+
+long Part2(string[] banks)
+{
+    var joltages = new List<long>();
+    
+    foreach(var bank in banks)
+    {
+        var numberOfIndices = bank.Length - 12;
+        var lowestIndices = new List<int>();
+        var runningSubstring = bank;
+        var maximumJoltage = "";
+        while (maximumJoltage.Length < 12)
+        {
+            var substring = HighestSubstring(runningSubstring, 12 - maximumJoltage.Length);
+            runningSubstring = substring[1..];
+            maximumJoltage += substring.First().ToString();
+        }
+        
+        // Console.WriteLine($"Maximum joltage for bank {bank} is {maximumJoltage}");
+        joltages.Add(long.Parse(maximumJoltage));
+    }
+    
+    return joltages.Sum();
+}
+
+int GetLowestIndex(string bank)
+{
+    var runningIndex = bank.Length - 1;
+    var runningValue = bank.Last();
+
+    for (var i = 0; i < bank.Length; i++)
+    {
+        if (bank[i] < runningValue)
+        {
+            runningValue = bank[i];
+            runningIndex = i;
+        }
+    }
+
+    return runningIndex;
+}
+
+string HighestSubstring(string bank, int length)
+{
+    // Console.WriteLine($"Finding {length} long substring in {bank}");
+    // var runningIndex = bank.Length - length;
+    // var runningValue = bank[^length];
+    var runningIndex = 0;
+    var runningValue = bank[0];
+
+    for (var i = 0; i <= (bank.Length - length); i++)
+    {
+        // Console.WriteLine($"position {i}, value {bank[i]}, running value {runningValue}@{runningIndex}");
+        if (bank[i] > runningValue)
+        {
+            runningValue = bank[i];
+            runningIndex = i;
+        }
+    }
+    // Console.WriteLine($"Running value {runningValue}@{runningIndex}");
+    var substring = bank[runningIndex..];
+    // Console.WriteLine($"Highest substring {substring} for bank {bank}");
+    return substring;
 }
