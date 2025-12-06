@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualBasic.CompilerServices;
 
-var input = File.ReadAllText("Input.txt");
-Console.WriteLine(Part1(input.Split("\n")));
-
 // var input = File.ReadAllText("Input.txt");
-// Console.WriteLine(Part2(input.Split(\n\n")));
+// Console.WriteLine(Part1(input.Split("\n")));
+
+var input = File.ReadAllText("Input.txt");
+Console.WriteLine(Part2(input.Split("\n")));
 
 long Part1(string[] lines)
 {
@@ -43,6 +43,63 @@ long Part1(string[] lines)
 
                 return a;
             });
+            sum += solution;
+        }
+    }
+    return sum;
+}
+
+long Part2(string[] lines)
+{
+    long sum = 0;
+    
+    var numbers = lines[..^1];
+    var symbols = lines[^1];
+    for (var i = 0; i < symbols.Length; i++)
+    {
+        var symbol = symbols[i].ToString();
+        if (symbol != " ")
+        {
+            int endIndex = i + 1;
+            
+            while (endIndex <= (symbols.Length - 1) && symbols[endIndex] == ' ')
+            {
+                endIndex++;
+                Console.WriteLine(endIndex);
+            }
+
+            endIndex -= 2;
+    
+        var computation = new List<long>();
+
+            for (var col = endIndex; col >= i; col--)
+            {
+                var numString = "";
+                for (var row = 0; row < numbers.Length; row++)
+                {
+                    var digit = numbers[row][col];
+                    if (digit != ' ')
+                        numString += digit;
+                }
+                var number = long.Parse(numString);
+                computation.Add(number);
+            }
+
+            var solution = computation.Aggregate((a, b) =>
+            {
+                switch (symbol)
+                {
+                    case "+":
+                        a += b;
+                        break;
+                    case "*": 
+                        a *= b;
+                        break;
+                }
+
+                return a;
+            });
+            Console.WriteLine(solution);
             sum += solution;
         }
     }
