@@ -1,21 +1,10 @@
 ﻿var input = File.ReadAllText("Sample.txt");
-Console.WriteLine(Part1(input.Split("\n")));
-// Console.WriteLine(Part2(input.Split("\n")));
+// Console.WriteLine(Part1(input.Split("\n")));
+Console.WriteLine(Part2(input.Split("\n")));
 
 long Part1(string[] lines)
 {
-    /* 1. interate over all nodes from position i=0 to length
-     *  - compute distance to all other nodes from current i to end
-     *  - Store all distances as keys in a sorted dictionary against box pairs
-     * 2. For each key in the dictionary's first 1000 entries
-     *  - Keep a running count of loop numbers (index)
-     *  - enter the two junction boxes into a new SortedDictionary, storing the loop number as the value
-     *  - increment the loop number by 1
-     *  - for the next key, check each of the junction boxes in that key in the dictionary. If present, store the new key with the existing key's value, else use the loop number index.
-     * 3. Return the values of the loop lookup, aggregated by counting the number of each values
-     */
-    var sortedConnections = new SortedDictionary<double, (string box1, string box2)>();
-
+    var distances = new List<(double distance, (string, string) boxes)>();
     // 1. Store all distances between nodes
     for (var i = 0; i < lines.Length; i++)
     {
@@ -23,31 +12,82 @@ long Part1(string[] lines)
         {
             var box1 = GetBox(lines[i]);
             var box2 = GetBox(lines[j]);
-            
-            var label = box1.x < box2.x ? (lines[i], lines[j]) : (lines[j], lines[i]);
             var distance = GetDistance(box1, box2);
-            sortedConnections[distance] = label;
+            distances.Add((distance, (lines[i], lines[j])));
         }
     }
     
-    // !!! Consider that the distances may not be unique, so setting sortedConnections[distance] might overwrite an existing lookup! Probably better to keep a running list where we sort as we enter the values? Or try coercing the dictionary into something sortable by value (in which case, we can use a regular dictionary rather than a sorted one)
+    distances.Sort((a, b) =>a.distance.CompareTo(b.distance));
 
-    // 2. Grab the first 1000 entries and 
-    var shortestThousand = sortedConnections.Values.ToArray()[..int.Min(1000, sortedConnections.Count)];
+    var maxConnections = int.Min(1000, distances.Count() - 1);
+    distances = distances[..(maxConnections)];
+
+    List<string> nodes = new List<string>(lines);
+    var connections = new List<List<string>>();
     
-    
-    return 0;
+    foreach (var link in distances)
+    {
+        var isBox1Present = !nodes.Contains(link.boxes.Item1);
+        var isBox2Present = !nodes.Contains(link.boxes.Item2);
+
+        switch (isBox1Present, isBox2Present)
+        {
+            case (true, true):
+             {
+                 int box1ListIndex = 0;
+                 int box2ListIndex = 0;
+                 for (var i = 0; i < connections.Count; i++)
+                 {
+                     var circuit = connections[i];
+                     if (circuit.Contains(link.boxes.Item1))
+                         box1ListIndex = i;
+                     if (circuit.Contains(link.boxes.Item2))
+                         box2ListIndex = i;
+                 }
+                 
+                 if (box1ListIndex == box2ListIndex)
+                     break;
+                 var combinedList = connections[box1ListIndex].Concat(connections[box2ListIndex]).ToList();
+                 connections[box1ListIndex] = combinedList;
+                 connections.Remove(connections[box2ListIndex]);
+                 break;
+             }
+            case (false, true):
+            case (true, false):
+            {
+                var matchedBox = isBox1Present ? link.boxes.Item1 : link.boxes.Item2;
+                var unmatchedBox = isBox2Present ? link.boxes.Item1 : link.boxes.Item2;
+                {
+                    foreach (var circuit in connections)
+                    {
+                        if (circuit.Contains(matchedBox))
+                        {
+                            circuit.Add(unmatchedBox);
+                            nodes.Remove(unmatchedBox);
+                        }
+                    }
+                }
+                break;
+            }
+            case (false, false):
+            {
+                var list = new List<string>{link.boxes.Item1, link.boxes.Item2};
+                connections.Add(list);
+                nodes.Remove(link.boxes.Item1);
+                nodes.Remove(link.boxes.Item2);
+                break;
+            }
+        }
+    }
+
+    connections.Sort((a, b) => b.Count.CompareTo(a.Count));
+    return connections[..3].Aggregate(1L, (acc, list) => acc *= list.Count());
 }
 
 (int x, int y, int z) GetBox(string line)
 {
     var parts = line.Split(',');
-
-    return (
-        int.Parse(parts[0]),
-        int.Parse(parts[1]),
-        int.Parse(parts[2])
-    );
+    return (x: int.Parse(parts[0]), y: int.Parse(parts[1]), z: int.Parse(parts[2]));
 }
 
 double GetDistance((int x, int y, int z) box1, (int x, int y, int z) box2)
