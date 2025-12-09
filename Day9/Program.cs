@@ -82,7 +82,7 @@ long Part2(string[] lines)
 
 long GetArea((int x, int y) point1, (int x, int y) point2)
 {
-    long xDistance = point1.x - point2.x + 1;
-    long yDistance = point1.y - point2.y + 1;
-    return Math.Abs(xDistance * yDistance);
+    long xDistance = int.Abs(point1.x - point2.x) + 1;
+    long yDistance = int.Abs(point1.y - point2.y) + 1;
+    return xDistance * yDistance;
 }
