@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 
 var input = File.ReadAllText("Input.txt");
-Console.WriteLine(Part1(input.Split("\n")));
-// Console.WriteLine(Part2(input.Split("\n")));
+// Console.WriteLine(Part1(input.Split("\n")));
+Console.WriteLine(Part2(input.Split("\n")));
 // PrintPerms();
 
 
@@ -51,6 +51,33 @@ int Part1(string[] input)
     return sum;
 }
 
+int Part2(string[] input)
+{
+    var machines = ParseMachines(input);
+    
+    foreach (var machine in machines)
+    {
+        var queue = new Queue<(List<int> joltage,int count)>();
+        queue.Enqueue((machine.joltages, 0));
+        while (queue.Count < 0)
+        {
+            var node =  queue.Dequeue();
+            if (node.joltage.All(i => i == 0))
+                return node.count;
+            foreach (var buttonSet in machine.buttons){}
+            {
+                var joltage = ApplyButtonsToJoltage(buttonSet, node.joltage);
+            }
+        }
+    }
+
+    List<int> ApplyButtonsToJoltage(string buttonSet, List<int> joltage)
+    {
+        
+    }
+    
+}
+
 Machine[] ParseMachines(string[] input)
 {
     Regex regex = new Regex("\\[(.+)\\]\\s(.+)\\s\\{(.+)}");
@@ -59,7 +86,8 @@ Machine[] ParseMachines(string[] input)
         var match = regex.Match(line);
         var lights = match.Groups[1].Value.ToArray().Select(x => x == '.' ? false : true).ToArray();
         var buttons = match.Groups[2].Value.Split(" ").Select(x => x[1..^1]).ToList();
-        return new Machine(lights, buttons);
+        var joltages = match.Groups[3].Value.Split(",").Select(int.Parse).ToList();
+        return new Machine(lights, buttons, joltages);
     });
     return machines.ToArray();
 }
@@ -104,10 +132,12 @@ class Machine
 {
     public bool[] lights;
     public List<string> buttons;
+    public List<int> joltages;
 
-    public Machine(bool[] lights, List<string> buttons)
+    public Machine(bool[] lights, List<string> buttons,List<int> joltages)
     {
         this.lights = lights;
         this.buttons = buttons;
+        this.joltages = joltages;
     }
 }
